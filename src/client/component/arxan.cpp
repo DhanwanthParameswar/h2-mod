@@ -5,6 +5,7 @@
 
 #include "game_module.hpp"
 #include "scheduler.hpp"
+#include "console.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/nt.hpp>
@@ -65,6 +66,12 @@ namespace arxan
 			for (auto i = 0; i < DBG_FUNCS_COUNT; i++)
 			{
 				dbg_func_procs[i] = ntdll.get_proc<void*>(dbg_funcs_names[i]);
+				if (!dbg_func_procs[i])
+				{
+					console::error("[Arxan] ntdll export %s is unavailable\n", dbg_funcs_names[i]);
+					continue;
+				}
+
 				std::memcpy(dbg_func_bytes[i].buffer, dbg_func_procs[i], sizeof(dbg_func_bytes[i].buffer));
 			}
 		}
@@ -73,6 +80,11 @@ namespace arxan
 		{
 			for (auto i = 0; i < DBG_FUNCS_COUNT; i++)
 			{
+				if (!dbg_func_procs[i])
+				{
+					continue;
+				}
+
 				utils::hook::copy(dbg_func_procs[i], dbg_func_bytes[i].buffer, sizeof(dbg_func_bytes[i].buffer));
 			}
 		}
